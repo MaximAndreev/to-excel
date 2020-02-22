@@ -12,6 +12,7 @@ buildscript {
 plugins {
     id 'java'
     id 'info.solidsoft.pitest' version '1.4.6'
+    id 'maven'
 }
 
 group 'ru.avtomir'
