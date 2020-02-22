@@ -1,6 +1,7 @@
 package ru.avtomir.toExcel;
 
-import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,8 +31,8 @@ public class NoStyleWorkbookWriter implements WorkbookWriter {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        HSSFWorkbook workbook = HSSFWorkbookFactory.createWorkbook();
-        HSSFSheet sheet = workbook.createSheet(sheetName);
+        Workbook workbook = XSSFWorkbookFactory.createWorkbook();
+        Sheet sheet = workbook.createSheet(sheetName);
         ifHeadersEmptyTryToGuessFromTableBody();
         writeHeaders(sheet);
         writeContent(sheet);
@@ -44,34 +45,34 @@ public class NoStyleWorkbookWriter implements WorkbookWriter {
         }
     }
 
-    private void writeHeaders(HSSFSheet sheet) {
+    private void writeHeaders(Sheet sheet) {
         if (!tableHeaders.isEmpty()) {
-            HSSFRow headerRow = sheet.createRow(0);
+            Row headerRow = sheet.createRow(0);
             writeCellValues(tableHeaders, headerRow);
         }
     }
 
-    private void writeContent(HSSFSheet sheet) {
+    private void writeCellValues(List<String> values, Row row) {
+        for (int i = 0; i < values.size(); i++) {
+            Cell cell = row.createCell(i, CellType.STRING);
+            cell.setCellValue(values.get(i));
+        }
+    }
+
+    private void writeContent(Sheet sheet) {
         for (int i = 0; i < tableBody.size(); i++) {
-            List<String> cellValues = parseCellValues(i);
+            List<String> cellValues = getOrderedCellValuesForRow(i);
             if (!cellValues.isEmpty()) {
-                HSSFRow row = sheet.createRow(i + 1);
+                Row row = sheet.createRow(i + 1);  // on the first row headers is written, so `+ 1`
                 writeCellValues(cellValues, row);
             }
         }
     }
 
-    private List<String> parseCellValues(int i) {
+    private List<String> getOrderedCellValuesForRow(int i) {
         Map<String, String> rowAsMap = tableBody.get(i);
         return tableHeaders.stream()
                 .map(header -> rowAsMap.getOrDefault(header, ""))
                 .collect(Collectors.toList());
-    }
-
-    private void writeCellValues(List<String> values, HSSFRow row) {
-        for (int i = 0; i < values.size(); i++) {
-            HSSFCell cell = row.createCell(i);
-            cell.setCellValue(values.get(i));
-        }
     }
 }
