@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+group 'ru.avtomir'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    apachePoiExcel = '4.1.2'
+    junit = '5.3.1'
+}
+
+dependencies {
+    implementation "org.apache.poi:poi:${apachePoiExcel}"
+    implementation "org.apache.poi:poi-ooxml:${apachePoiExcel}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junit}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit}"
+}
+
+test {
+    useJUnitPlatform()
+
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+        }
+    }
+}
